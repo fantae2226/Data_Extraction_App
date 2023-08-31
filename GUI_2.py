@@ -5,6 +5,7 @@ import cv2
 import numpy as np 
 from PIL import Image, ImageTk, ImageEnhance
 from enum import Enum
+from Extraction_Algorithm import capture_region
 
 class MyApp:
     def __init__(self):
@@ -199,6 +200,18 @@ class ImageHandler:
 
         self.current_img = self.original_img.resize((new_width,new_height), Image.LANCZOS)
 
+    def captured_text_regions(self, start_x, start_y, end_x, end_y):
+        np_img = np.array(self.original_img)
+
+        if len(np_img.shape) == 2:
+            cv2_img = np_img
+        elif np_img.shape[2] == 3:
+            cv2_img = cv2.cvtColor(np_img, cv2.COLOR_BGR2GRAY)
+        else:
+            raise ValueError('Unexpected Image Shape')
+        
+        captured_text = capture_region(cv2_img[int(start_y):int(end_y), int(start_x):int(end_x)])
+        print(f'You have captured: {len(captured_text)} regions of text')
 class Mode(Enum):
     MOVE = 1
     DRAW = 2
@@ -279,6 +292,8 @@ class Image_Canvas(tk.Canvas):
 
         print(f"Region Coords: Start_x:{start_x}, Stary_y:{start_y}, End_x:{end_x}, End_y:{end_y}")
 
+        #Call image region count method
+        self.app.image_handler.captured_text_regions(start_x,start_y,end_x,end_y)
     def on_resize(self, event):
         if self.app.image_handler.get_current_img() is not None:
             self.config(scrollregion=self.bbox('all'))
@@ -306,7 +321,7 @@ class Image_Canvas(tk.Canvas):
             self.app.image_handler.zoom(factor)
             self.tk_img = self.app.image_handler.get_tk_img()
             self.itemconfig(self.img_id, image = self.tk_img)
-            self.config(scrollregion=(0,0, self.tk_img.width() , self.tk_img.height()))   #
+            self.config(scrollregion=(0,0, self.tk_img.width() , self.tk_img.height()))   
 
 
     def add_image(self, tk_img):
@@ -316,7 +331,7 @@ class Image_Canvas(tk.Canvas):
 
         self.img_id = self.create_image(0,0, image=self.tk_img, anchor = 'nw')
      
-        self.config(scrollregion=(0,0, self.tk_img.width(), self.tk_img.height())) #, tk_img.width, tk_img.height
+        self.config(scrollregion=(0,0, self.tk_img.width(), self.tk_img.height())) 
     
     def clear_canvas(self):
         self.delete('all')
