@@ -113,7 +113,7 @@ class Files_Tab(ttk.Frame):
 
         #This frame contains the image canvas and all the widgets that directly control it
         self.image_container = ttk.Frame(self)
-        self.image_container.pack()
+        self.image_container.pack(side='left')
 
         self.image_canvas = Image_Canvas(self.image_container, self, parent.master, highlightthickness=2, width=800, height=600, background = 'red')
         self.image_canvas.pack(fill=tk.BOTH, expand=True)
@@ -127,6 +127,13 @@ class Files_Tab(ttk.Frame):
 
         self.clear_btn = ttk.Button(self.image_container, text='Clear', command= lambda: self.image_canvas.clear_canvas())
         self.clear_btn.pack()
+
+        #Label Captured text frame 
+        self.text_label_frame = ttk.Frame(self, relief='solid')
+        self.text_label_frame.pack(side='left')
+
+        # self.label = ttk.Label(self.text_label_frame, text= 'Random shit to see if the frame works properly boy i hope it does')
+        # self.label.pack()
 
     def on_add_image(self):
         img = self.image_handler.open_image()
@@ -212,6 +219,9 @@ class ImageHandler:
         
         captured_text = capture_region(cv2_img[int(start_y):int(end_y), int(start_x):int(end_x)])
         print(f'You have captured: {len(captured_text)} regions of text')
+        
+        return len(captured_text)
+    
 class Mode(Enum):
     MOVE = 1
     DRAW = 2
